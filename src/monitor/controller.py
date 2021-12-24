@@ -2,7 +2,7 @@ from threading import Thread
 import time
 
 from monitor.measurements import Measurement
-from monitor.sensors import AbstractSensor, SensorType
+from monitor.sensors import AbstractSensor
 
 
 class Controller:
@@ -15,9 +15,7 @@ class Controller:
         self.sensors.append(sensor)
 
     def get_measurements(self) -> list[Measurement]:
-        measurements: list[Measurement] = [
-            sensor.get_measurement() for sensor in self.sensors 
-            ]
+        measurements: list[Measurement] = [sensor.get_measurement() for sensor in self.sensors]
         return measurements
 
     def start_polling(self):

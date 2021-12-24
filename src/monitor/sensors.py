@@ -14,10 +14,9 @@ class AbstractSensor(ABC):
     '''
     Abstract base class for sensors.
     '''
-
     def __init__(self, sensor_id: str) -> None:
         self.sensor_id: str = sensor_id
-        self.type: SensorType = None # type: ignore
+        self.type: SensorType = None  # type: ignore
 
     @abstractmethod
     def get_measurement(self) -> Measurement:
@@ -31,7 +30,6 @@ class DS18B20Sensor(AbstractSensor):
     '''
     A sensor that measures the temperature of a DS18B20 sensor.
     '''
-
     def __init__(self, sensor_id: str):
         '''
         Initializes a new DS18B20Sensor.
@@ -44,6 +42,7 @@ class DS18B20Sensor(AbstractSensor):
         Returns the current measurement.
         '''
         return Measurement(self.sensor_id, get_timestamp_now(), 1.0)
+
 
 def get_timestamp_now():
     '''
