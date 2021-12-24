@@ -7,5 +7,5 @@ class Measurement:
     A measurement is a single reading from a sensor.
     '''
     sensor_id: str
-    timestamp: str
+    timestamp: float
     value: float

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from enum import Enum, auto
 
 from monitor.measurements import Measurement
@@ -6,12 +7,17 @@ from monitor.measurements import Measurement
 
 class SensorType(Enum):
     TEMPERATURE = auto()
+    HUMIDITY = auto()
 
 
 class AbstractSensor(ABC):
     '''
     Abstract base class for sensors.
     '''
+
+    def __init__(self, sensor_id: str) -> None:
+        self.sensor_id: str = sensor_id
+        self.type: SensorType = None # type: ignore
 
     @abstractmethod
     def get_measurement(self) -> Measurement:
@@ -37,4 +43,10 @@ class DS18B20Sensor(AbstractSensor):
         '''
         Returns the current measurement.
         '''
-        return Measurement(self.sensor_id, 'timestamp', 1.0)
+        return Measurement(self.sensor_id, get_timestamp_now(), 1.0)
+
+def get_timestamp_now():
+    '''
+    Returns the current timestamp.
+    '''
+    return datetime.timestamp(datetime.now())
