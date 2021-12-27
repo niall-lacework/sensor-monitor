@@ -1,5 +1,7 @@
 import time
 
+import pytest
+
 from monitor.controller import Controller
 
 
@@ -53,10 +55,47 @@ def test_can_poll_sensors(temperature_sensor_fixture, humidity_sensor_fixture):
     c.add_sensor(sensor1)
     c.add_sensor(sensor2)
     c.start_polling()
-    time.sleep(2)
     c.stop_polling()
-    assert len(c.get_measurements()) == 2
+    result = c.measurements
+    assert len(result) == 2
 
-    sensor_ids = [m.sensor_id for m in c.get_measurements()]
+    sensor_ids = [m.sensor_id for m in result]
     assert 'sensor_id_1' in sensor_ids
     assert 'sensor_id_2' in sensor_ids
+
+
+def test_polling_interval_can_be_set(temperature_sensor_fixture):
+    sensor1 = temperature_sensor_fixture('sensor_id_1')
+    c = Controller()
+    c.add_sensor(sensor1)
+    c.start_polling(polling_interval=2)
+    time.sleep(3)  # wait for 3 seconds. Should be enough time to get 2 measurements
+    c.stop_polling()
+    result = c.measurements
+    assert len(result) == 2
+
+    sensor_ids = [m.sensor_id for m in result]
+    assert 'sensor_id_1' in sensor_ids
+
+
+def test_polling_interval_cannot_be_negative(temperature_sensor_fixture):
+    sensor1 = temperature_sensor_fixture('sensor_id_1')
+    c = Controller()
+    c.add_sensor(sensor1)
+    with pytest.raises(ValueError):
+        c.start_polling(polling_interval=-1)
+
+
+def test_polling_sensors_if_sensor_measurement_is_longer_than_polling_interval(temperature_sensor_fixture):
+    sensor1 = temperature_sensor_fixture('sensor_id_1')
+    sensor1.measurement_delay = 3
+    c = Controller()
+    c.add_sensor(sensor1)
+    c.start_polling(polling_interval=1)
+    time.sleep(2)  # wait for 2 seconds. Should be enough time to get 1 measurement
+    c.stop_polling()
+    result = c.measurements
+    assert len(result) == 1
+
+    sensor_ids = [m.sensor_id for m in result]
+    assert 'sensor_id_1' in sensor_ids
