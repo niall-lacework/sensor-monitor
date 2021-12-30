@@ -8,7 +8,7 @@ from monitor.measurements import Measurement
 if sys.platform == 'darwin':
     executable = '/usr/local/bin/redis-server'
 else:
-    executable = '/usr/bin/redis-server'
+    executable = 'redis-server'
 
 redis_my_proc = factories.redis_proc(executable=executable, port=None, datadir='/tmp/pytest')
 fake_redis_db = factories.redisdb('redis_my_proc')
