@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 import json
+from typing import Union
 
 from monitor.measurements import Measurement
 from redis import Redis  # type: ignore
@@ -31,6 +32,8 @@ class RedisRepository(AbstractRepository):
         measurements = [Measurement(**json.loads(measurement)) for measurement in all_measurements]
         return [measurement for measurement in measurements if measurement.sensor_id == sensor_id]
 
-    def pop_measurement(self) -> Measurement:
+    def pop_measurement(self) -> Union[Measurement, None]:
         measurement = self.redis_client.lpop('measurements')
+        if measurement is None:
+            return None
         return Measurement(**json.loads(measurement))

@@ -33,3 +33,6 @@ def test_redis_repository_pop_measurements(timestamp_fixture, fake_redis_db):
 
     popped2 = repo.pop_measurement()
     assert popped2 == measurement2
+
+    popped3 = repo.pop_measurement()
+    assert popped3 is None
