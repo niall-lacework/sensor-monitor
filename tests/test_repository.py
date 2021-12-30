@@ -19,6 +19,7 @@ def test_redis_repository_get_measurements(timestamp_fixture, fake_redis_db):
     repo.add_measurement(measurement)
     assert repo.get_measurements('sensor_id')[0] == measurement
 
+
 def test_redis_repository_pop_measurements(timestamp_fixture, fake_redis_db):
     measurement1 = Measurement('sensor_id', timestamp_fixture, 1.0)
     measurement2 = Measurement('sensor_id', timestamp_fixture, 2.0)
