@@ -1,6 +1,9 @@
 import logging
+from threading import Thread
+import time
 
 from monitor.sensors import AbstractSensor
+from monitor.repository import AbstractRepository
 
 LOG = logging.getLogger(__name__)
 
@@ -9,8 +12,11 @@ class Controller:
     '''
     Controller for sensors.
     '''
-    def __init__(self):
+    def __init__(self, repo: AbstractRepository):
+        self.repo = repo
+
         self._sensors: list[AbstractSensor] = []
+        self._polling_threads: list[Thread] = []
 
     @property
     def sensors(self):
@@ -41,16 +47,33 @@ class Controller:
         :param polling_interval: polling interval in seconds
         '''
         LOG.info('Starting polling sensors with interval - [{}]'.format(polling_interval))
+        self.polling_interval = polling_interval
+        self.running = True
+        for sensor in self._sensors:
+            t = Thread(target=self.poll_sensor, args=(sensor,))
+            t.start()
+            self._polling_threads.append(t)
 
-    def poll_sensor(self, sensor: AbstractSensor, polling_interval: float):
+    def poll_sensor(self, sensor: AbstractSensor):
         '''
         Poll sensors in a separate thread.
         :param polling_interval: polling interval in seconds
         '''
-        LOG.info('Polling sensor - [{}] with interval - [{}]'.format(sensor.sensor_id, polling_interval))
+        while True and self.running:
+            LOG.info('Polling sensor - [{}] with interval - [{}]'.format(sensor.sensor_id, self.polling_interval))
+            start = time.time()
+            measurement = sensor.get_measurement()
+            stop = time.time()
+            self.repo.add_measurement(measurement)
+            time.sleep(max(0, self.polling_interval - (stop - start)))
 
     def stop_polling(self):
         '''
         Stop polling sensors.
         '''
+        self.running = False
         LOG.info('Stopping polling sensors')
+        for t in self._polling_threads:
+            t.join()
+        self._polling_threads = []
+        LOG.info('Polling sensors stopped')

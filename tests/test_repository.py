@@ -8,7 +8,7 @@ from monitor.measurements import Measurement
 if sys.platform == 'darwin':  # local testing on mac
     redis_my_proc = factories.redis_proc(executable='/usr/local/bin/redis-server', port=None, datadir='/tmp/pytest')
     fake_redis_db = factories.redisdb('redis_my_proc')
-else:
+else:  # CI testing. Redis is already running on port 6379
     fake_redis_db = factories.redisdb('redis_nooproc')
 
 
