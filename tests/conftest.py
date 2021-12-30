@@ -42,7 +42,8 @@ class FakeTemperatureSensor(AbstractSensor):
 class FakeHumiditySensor(AbstractSensor):
     def __init__(self, sensor_id) -> None:
         self.sensor_id = sensor_id
-        self.measurement_delay = 0.0
+        self._polling_interval = 1.0
+        self._measurement_delay = 0.5
 
     def get_measurement(self):
         time.sleep(self.measurement_delay)

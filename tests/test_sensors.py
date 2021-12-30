@@ -51,6 +51,14 @@ def test_ds18b20_cannot_set_measurement_delay_less_than_zero(tmpdir):
         s.measurement_delay = -1.0
 
 
+def test_ds18b20_should_update_polling_interval_if_measurement_delay_set_to_more_than_polling_interval(tmpdir, good_measurement):
+    device_file = Path(tmpdir) / 'sensor.txt'
+    device_file.write_text(good_measurement)
+    s = DS18B20Sensor('sensor_id', device_file)
+    s.measurement_delay = 2.0
+    assert s.polling_interval == 2.0
+
+
 def test_cannot_set_polling_interval_less_than_measurement_delay(tmpdir):
     device_file = Path(tmpdir) / 'sensor.txt'
     device_file.touch()

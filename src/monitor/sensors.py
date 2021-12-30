@@ -102,6 +102,9 @@ class AbstractSensor(ABC):
         if value < 0:
             LOG.error('Measurement delay [{}] is negative'.format(value))
             raise SensorConfigError('Measurement delay cannot be negative')
+        if value > self.polling_interval:
+            LOG.info('Measurement delay [{}] is greater than polling interval [{}]'.format(value, self.polling_interval))
+            self.polling_interval = value
         self._measurement_delay = value
 
 
