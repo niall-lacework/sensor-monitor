@@ -30,3 +30,7 @@ class RedisRepository(AbstractRepository):
         all_measurements = self.redis_client.lrange('measurements', 0, -1)
         measurements = [Measurement(**json.loads(measurement)) for measurement in all_measurements]
         return [measurement for measurement in measurements if measurement.sensor_id == sensor_id]
+
+    def pop_measurement(self) -> Measurement:
+        measurement = self.redis_client.lpop('measurements')
+        return Measurement(**json.loads(measurement))
