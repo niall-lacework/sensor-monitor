@@ -1,14 +1,25 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum, auto
+import logging
 from pathlib import Path
 
 from monitor.measurements import Measurement
 
 
+LOG = logging.getLogger('monitor_logger')
+
+
 class SensorInitError(Exception):
     '''
     Exception for sensor initialisation errors.
+    '''
+    pass
+
+
+class SensorConfigError(Exception):
+    '''
+    Exception for sensor configuration errors.
     '''
     pass
 
@@ -30,10 +41,11 @@ class AbstractSensor(ABC):
     Abstract base class for sensors.
     '''
 
-    type: SensorType = None  # type: ignore
-
     def __init__(self, sensor_id: str) -> None:
         self.sensor_id: str = sensor_id
+
+        self._polling_interval = 1.0
+        self._measurement_delay = 1.0
 
     @abstractmethod
     def get_measurement(self) -> Measurement:
@@ -42,13 +54,61 @@ class AbstractSensor(ABC):
         '''
         pass
 
+    @property
+    @abstractmethod
+    def type(self) -> SensorType:
+        '''
+        Returns the sensor type.
+        '''
+        pass
+
+    @property
+    def polling_interval(self) -> float:
+        '''
+        Returns the polling interval.
+
+        :return: polling interval
+        '''
+        return self._polling_interval
+
+    @polling_interval.setter
+    def polling_interval(self, value: float) -> None:
+        '''
+        Sets the polling interval.
+
+        :param value: polling interval
+        '''
+        if value < self.measurement_delay:
+            LOG.error('Polling interval [{}] is less than measurement delay [{}]'.format(value, self.measurement_delay))
+            raise SensorConfigError('Polling interval cannot be smaller than measurement delay')
+        self._polling_interval = value
+
+    @property
+    def measurement_delay(self) -> float:
+        '''
+        Returns the measurement delay.
+
+        :return: measurement delay
+        '''
+        return self._measurement_delay
+
+    @measurement_delay.setter
+    def measurement_delay(self, value: float) -> None:
+        '''
+        Sets the measurement delay.
+
+        :param value: measurement delay
+        '''
+        if value < 0:
+            LOG.error('Measurement delay [{}] is negative'.format(value))
+            raise SensorConfigError('Measurement delay cannot be negative')
+        self._measurement_delay = value
+
 
 class DS18B20Sensor(AbstractSensor):
     '''
     A sensor that measures the temperature of a DS18B20 sensor.
     '''
-
-    type = SensorType.TEMPERATURE
 
     def __init__(self, sensor_id: str, device_file: Path):
         '''
@@ -63,6 +123,18 @@ class DS18B20Sensor(AbstractSensor):
 
         if not device_file.is_file():
             raise SensorInitError('Device file does not exist')
+
+        self._polling_interval = 1.0
+        self._measurement_delay = 1.0
+
+    @property
+    def type(self) -> SensorType:
+        '''
+        Returns the sensor type.
+
+        :return: sensor type
+        '''
+        return SensorType.TEMPERATURE
 
     def _read_device_file(self):
         with open(self.device_file, 'r') as f:

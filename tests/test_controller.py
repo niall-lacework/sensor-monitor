@@ -44,11 +44,13 @@ def test_should_not_throw_exception_removing_sensor_that_does_not_exist(temperat
 
 def test_can_poll_sensor(temperature_sensor_fixture, timestamp_fixture):
     sensor = temperature_sensor_fixture('sensor_id_1')
+    sensor.measurement_delay = 0.5  # time to take a measurement
+    sensor.polling_interval = 1.0  # polling interval
     repo = FakeRepo()
     c = Controller(repo)
     c.add_sensor(sensor)
-    c.start_polling(polling_interval=2)
-    time.sleep(1)  # time for 1 measurement
+    c.start_polling()
+    time.sleep(0.5)  # time for 1 measurement
     c.stop_polling()
 
     results = repo.get_measurements(sensor.sensor_id)
@@ -65,8 +67,8 @@ def test_can_poll_multiple_sensors(temperature_sensor_fixture, timestamp_fixture
     c = Controller(repo)
     c.add_sensor(sensor1)
     c.add_sensor(sensor2)
-    c.start_polling(polling_interval=2)
-    time.sleep(1)  # time for 1 measurement for each sensor
+    c.start_polling()
+    time.sleep(0.5)  # time for 1 measurement for each sensor
     c.stop_polling()
 
     results = repo.get_measurements(sensor1.sensor_id)
@@ -82,11 +84,11 @@ def test_can_poll_multiple_sensors(temperature_sensor_fixture, timestamp_fixture
     assert results[0].timestamp == timestamp_fixture
 
 
-def test_should_not_poll_sensor_if_not_added(temperature_sensor_fixture, timestamp_fixture):
+def test_should_not_poll_sensor_if_not_added(temperature_sensor_fixture):
     sensor = temperature_sensor_fixture('sensor_id_1')
     repo = FakeRepo()
     c = Controller(repo)
-    c.start_polling(polling_interval=2)
+    c.start_polling()
     time.sleep(1)  # time for 1 measurement
     c.stop_polling()
 
@@ -94,7 +96,7 @@ def test_should_not_poll_sensor_if_not_added(temperature_sensor_fixture, timesta
     assert len(results) == 0
 
 
-def test_should_not_poll_sensor_if_not_started(temperature_sensor_fixture, timestamp_fixture):
+def test_should_not_poll_sensor_if_not_started(temperature_sensor_fixture):
     sensor = temperature_sensor_fixture('sensor_id_1')
     repo = FakeRepo()
     c = Controller(repo)
@@ -105,23 +107,7 @@ def test_should_not_poll_sensor_if_not_started(temperature_sensor_fixture, times
     assert len(results) == 0
 
 
-def test_can_configure_polling_interval(temperature_sensor_fixture, timestamp_fixture):
-    sensor = temperature_sensor_fixture('sensor_id_1')
-    repo = FakeRepo()
-    c = Controller(repo)
-    c.add_sensor(sensor)
-    c.start_polling(polling_interval=0.1)
-    time.sleep(1)  # time for 10 measurements
-    c.stop_polling()
-
-    results = repo.get_measurements(sensor.sensor_id)
-    assert len(results) == 10
-    assert results[0].sensor_id == sensor.sensor_id
-    assert results[0].value == 1.0
-    assert results[0].timestamp == timestamp_fixture
-
-
-def test_polling_interval_includes_time_to_take_measurement(temperature_sensor_fixture, timestamp_fixture):
+def test_polling_interval_includes_time_to_take_measurement(temperature_sensor_fixture):
     '''
     If the polling interval is 1s and the time to take a measurement is 0.5s,
     then the controller should know not to wait 1.5s before taking the next measurement.
@@ -130,10 +116,11 @@ def test_polling_interval_includes_time_to_take_measurement(temperature_sensor_f
     '''
     sensor = temperature_sensor_fixture('sensor_id_1')
     sensor.measurement_delay = 0.5  # time to take a measurement
+    sensor.polling_interval = 1.0  # polling interval
     repo = FakeRepo()
     c = Controller(repo)
     c.add_sensor(sensor)
-    c.start_polling(polling_interval=1)
+    c.start_polling()
     time.sleep(1.1)  # time for 2 measurements
     c.stop_polling()
 

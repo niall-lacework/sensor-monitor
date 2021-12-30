@@ -5,7 +5,7 @@ import time
 from monitor.sensors import AbstractSensor
 from monitor.repository import AbstractRepository
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger('monitor_logger')
 
 
 class Controller:
@@ -47,7 +47,6 @@ class Controller:
         :param polling_interval: polling interval in seconds
         '''
         LOG.info('Starting polling sensors with interval - [{}]'.format(polling_interval))
-        self.polling_interval = polling_interval
         self.running = True
         for sensor in self._sensors:
             t = Thread(target=self.poll_sensor, args=(sensor,))
@@ -59,13 +58,14 @@ class Controller:
         Poll sensors in a separate thread.
         :param polling_interval: polling interval in seconds
         '''
+        polling_interval = sensor.polling_interval
         while True and self.running:
-            LOG.info('Polling sensor - [{}] with interval - [{}]'.format(sensor.sensor_id, self.polling_interval))
+            LOG.info('Polling sensor - [{}] with interval - [{}]'.format(sensor.sensor_id, polling_interval))
             start = time.time()
             measurement = sensor.get_measurement()
             stop = time.time()
             self.repo.add_measurement(measurement)
-            time.sleep(max(0, self.polling_interval - (stop - start)))
+            time.sleep(polling_interval - (stop - start))
 
     def stop_polling(self):
         '''
