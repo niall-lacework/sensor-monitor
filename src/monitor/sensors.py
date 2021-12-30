@@ -31,7 +31,7 @@ class AbstractSensor(ABC):
     '''
 
     type: SensorType = None  # type: ignore
-    
+
     def __init__(self, sensor_id: str) -> None:
         self.sensor_id: str = sensor_id
 

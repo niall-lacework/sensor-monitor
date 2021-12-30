@@ -26,24 +26,24 @@ def mock_time_stamp(monkeypatch):
 
 class FakeTemperatureSensor(AbstractSensor):
     def __init__(self, sensor_id) -> None:
-        self.senor_id = sensor_id
+        self.sensor_id = sensor_id
         self.type = SensorType.TEMPERATURE
         self.measurement_delay = 0.0
 
     def get_measurement(self):
         time.sleep(self.measurement_delay)
-        return Measurement(self.senor_id, static_timestamp(), 1.0)
+        return Measurement(self.sensor_id, static_timestamp(), 1.0)
 
 
 class FakeHumiditySensor(AbstractSensor):
     def __init__(self, sensor_id) -> None:
-        self.senor_id = sensor_id
+        self.sensor_id = sensor_id
         self.type = SensorType.HUMIDITY
         self.measurement_delay = 0.0
 
     def get_measurement(self):
         time.sleep(self.measurement_delay)
-        return Measurement(self.senor_id, static_timestamp(), 1.0)
+        return Measurement(self.sensor_id, static_timestamp(), 1.0)
 
 
 @pytest.fixture

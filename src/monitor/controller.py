@@ -6,6 +6,8 @@ from monitor.measurements import Measurement
 from monitor.sensors import AbstractSensor
 
 LOG = logging.getLogger(__name__)
+
+
 class Controller:
     '''
     Controller for sensors.
@@ -16,7 +18,7 @@ class Controller:
         self.polling_thread = None
 
         self.measurements = []
-    
+
     @property
     def sensors(self):
         return self._sensors
@@ -28,7 +30,7 @@ class Controller:
         '''
         self._sensors.append(sensor)
         LOG.info('Added sensor - [{}]'.format(sensor.sensor_id))
-    
+
     def remove_sensor(self, sensor: AbstractSensor):
         '''
         Remove a sensor from the list of sensors.
