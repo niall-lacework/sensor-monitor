@@ -29,9 +29,11 @@ class AbstractSensor(ABC):
     '''
     Abstract base class for sensors.
     '''
+
+    type: SensorType = None  # type: ignore
+    
     def __init__(self, sensor_id: str) -> None:
         self.sensor_id: str = sensor_id
-        self.type: SensorType = None  # type: ignore
 
     @abstractmethod
     def get_measurement(self) -> Measurement:
